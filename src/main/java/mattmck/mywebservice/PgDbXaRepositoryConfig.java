@@ -33,20 +33,20 @@ public class PgDbXaRepositoryConfig {
 	//Restart Service
 	//Validate by running following Query :- SHOW max_prepared_transactions;
 	
-	@Bean
+	@Bean(name = "pgDbDataSourceProperties")
     @ConfigurationProperties("spring.datasource.pgdb")
-    public DataSourceProperties db1DataSourceProperties() {
+    public DataSourceProperties dataSourceProperties() {
         return new DataSourceProperties();
     }
 
 	@Bean(name = "pgDbDataSource")
     @Primary
-    public DataSource dataSource() {
+    public DataSource dataSource(@Qualifier("pgDbDataSourceProperties") DataSourceProperties properties) {
 
     	PGXADataSource dataSource = new PGXADataSource(); 
-    	dataSource.setURL(db1DataSourceProperties().getUrl());
-    	dataSource.setUser(db1DataSourceProperties().getUsername());
-    	dataSource.setPassword(db1DataSourceProperties().getPassword());
+    	dataSource.setURL(properties.getUrl());
+    	dataSource.setUser(properties.getUsername());
+    	dataSource.setPassword(properties.getPassword());
     	
     	AtomikosDataSourceBean xaDataSource = new AtomikosDataSourceBean();
     	xaDataSource.setXaDataSourceClassName("org.postgresql.Driver");
