@@ -5,6 +5,7 @@ import java.util.Objects;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,24 +27,17 @@ public class TestService {
 	@Autowired
 	private OraDbXaTestRepository oraDbXaTestRepository;
 	
-//	@Autowired
-//	private JmsTemplate jmsTemplate;
+	@Autowired
+	private JmsTemplate jmsTemplate;
 
-//	@Autowired
-//    @Qualifier("jmsTemplate1")
-//    private JmsTemplate jmsTemplate1;
-//	
-//	@Autowired
-//    @Qualifier("jmsTemplate2")
-//    private JmsTemplate jmsTemplate2;
-	
-	
+
 	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = { Exception.class, RuntimeException.class })
 	public String testSuccess() {
 		log.debug("testSuccess");
 
 		testOracleInsert();
 		testPostgresInsert();
+		testJmsSend();
 		
 		return  "SUCCESS " + LocalDateTime.now();
 	}
@@ -54,6 +48,7 @@ public class TestService {
 		
 		testOracleInsert();
 		testPostgresInsert();
+		testJmsSend();
 		
 		throw new RuntimeException("FAIL");
 	}
@@ -72,5 +67,9 @@ public class TestService {
 		entity.setId(Objects.toString(UUID.randomUUID()));
 		entity.setValue("Test " + LocalDateTime.now());
 		pgDbXaTestRepository.save(entity);
+	}
+	
+	private void testJmsSend() {
+		jmsTemplate.convertAndSend("testQueue", "TEST MESSAGE");
 	}
 }
